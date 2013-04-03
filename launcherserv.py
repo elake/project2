@@ -9,7 +9,7 @@ debug = False
 
 def main():
     args = parse_args()
-
+    sent = 0
     # Initialize some stuff...
     if args.serialport:
         print("Opening serial port: %s" % args.serialport)
@@ -31,7 +31,12 @@ def main():
             print(split[2])
         elif (len(split) == 1):
             if (0 <= int(split[0]) <= 14):
-                stormLauncher.launchControl().turretFire()
+                if not sent:
+                    stormLauncher.launchControl().turretLeft()
+                    stormLauncher.launchControl().turretFire()
+                    time.sleep(0.5)
+                    stormLauncher.launchControl().turretStop()
+                    sent = 1
 
 def send(serial_port, message):
     """
