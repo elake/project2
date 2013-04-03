@@ -1,0 +1,10 @@
+Launcher Statistics:
+
+-270 degree turning radius
+-Rotates at approximately 49.3 degrees per second in both directions
+-Approximately 45 degree inclination/declination
+-Rotates from fully declined position to fully inclined position in 
+ approximately 0.695 seconds
+-Rotates from fully inclined position to fully declined position in
+ approximately 0.755 seconds
+
