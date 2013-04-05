@@ -9,6 +9,7 @@ debug = False
 
 def main():
     args = parse_args()
+    launcher = stormLauncher.launchControl()
     sent = 0
     # Initialize some stuff...
     if args.serialport:
@@ -24,19 +25,18 @@ def main():
         debug = False
 
     idx = 0
+    time.sleep(5.0)
     while True:
         msg = receive(serial_in) # get the message coming in on the serial port
+        print(msg)
         split = msg.split(" ")
-        if len(split) == 3: #Don't process junk data
-            print(split[2])
-        elif (len(split) == 1):
-            if (0 <= int(split[0]) <= 14):
-                if not sent:
-                    stormLauncher.launchControl().turretLeft()
-                    stormLauncher.launchControl().turretFire()
-                    time.sleep(0.5)
-                    stormLauncher.launchControl().turretStop()
+        if len(split) == 5: #Don't process junk data
+            pass #print(split[2])
+        elif (len(split) == 3):
+            if (0 <= int(split[2]) <= 14 and not sent):
+                    launcher.face_angle(45)
                     sent = 1
+                    launcher.turretFire()
 
 def send(serial_port, message):
     """

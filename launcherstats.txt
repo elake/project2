@@ -8,3 +8,27 @@ Launcher Statistics:
 -Rotates from fully inclined position to fully declined position in
  approximately 0.755 seconds
 
+
+      # state:
+      self._current_facing = 0
+
+      # determined via experimentation:
+      self._rotation_rate = 49.3
+      self._pitch_up_rate = 64.748
+      self._pitch_down_rate = 59.603
+
+   def get_current_facing(self):
+      return self._current_facing
+
+   def get_rotation_rate(self):
+      return self._rotation_rate
+
+   def get_pitch_up_rate(self):
+      return self._pitch_up_rate
+
+   def get_pitch_down_rate(self):
+      return self._pitch_down_rate
+
+   def get_firing_time(self):
+      return self._firing_time
+

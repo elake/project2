@@ -29,7 +29,7 @@ void setup()
       active_pins++;
     }
   }
-  Serial.print("Pins active: ");
+  Serial.print("Number of pins active: ");
   Serial.println(active_pins);
 }
 
@@ -45,6 +45,7 @@ void loop()
     //Serial.print(default_voltages[i]); Serial.print(" ");
     // Serial.print(diff); Serial.print(" ");
     if (diff > 50) {
+       Serial.print("Laser Tripped: ");
        Serial.println(i);
     }
   }

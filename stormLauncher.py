@@ -47,6 +47,33 @@ class launchControl():
          self.dev.detach_kernel_driver(0)
       self.dev.set_configuration()
 
+      # state:
+      self.face_left_fully()
+      self._current_facing = 0
+
+      # determined via experimentation:
+      self._rotation_rate = 49.3
+      self._pitch_up_rate = 64.748
+      self._pitch_down_rate = 59.603
+      self._firing_time = 0
+
+   # Accessors:
+   def get_facing(self):
+      return self._current_facing
+
+   def get_rotation_rate(self):
+      return self._rotation_rate
+
+   def get_pitch_up_rate(self):
+      return self._pitch_up_rate
+
+   def get_pitch_down_rate(self):
+      return self._pitch_down_rate
+
+   def get_firing_time(self):
+      return self._firing_time
+
+   # Commands:
    def turretUp(self):
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x02,0,0,0,0,0,0])
       
@@ -65,6 +92,43 @@ class launchControl():
    def turretFire(self):
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
 
+   def rotate_left_for(self, seconds):
+      self.turretLeft()
+      time.sleep(float(seconds))
+      self.turretStop()
+
+   def rotate_right_for(self, seconds):
+      self.turretRight()
+      time.sleep(float(seconds))
+      self.turretStop()
+      
+   def face_left_fully(self):
+      self.turretLeft()
+      time.sleep(6.0)
+      self.turretStop()
+
+   # Other:
+   def turn_time(self, angle):
+      '''
+      the amount of time it will take for me to turn by angle
+      '''
+      rotation_rate = self.get_rotation_rate()
+      return angle / rotation_rate
+      
+   def angle_to_left(self, angle):
+      return (angle - self.get_facing() < 0)
+
+   def face_angle(self, angle):
+      facing = self.get_facing()
+      rotation_needed = abs(angle - facing)
+
+      rotation_time = self.turn_time(rotation_needed)
+      
+      if (self.angle_to_left(angle)):
+         self.rotate_left_for(rotation_time)
+      else:
+         self.rotate_right_for(rotation_time)
+      
 
 if __name__ == '__main__':
    pass
