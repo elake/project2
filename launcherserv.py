@@ -29,12 +29,13 @@ def main():
     while True:
         msg = receive(serial_in) # get the message coming in on the serial port
         print(msg)
-        split = msg.split(" ")
-        if len(split) == 5: #Don't process junk data
-            pass #print(split[2])
-        elif (len(split) == 3):
-            if (0 <= int(split[2]) <= 14 and not sent):
-                    launcher.face_angle(45)
+        msg = msg.split(" ")
+        if len(msg) == 5: # Receiving num_lasers
+            laser_array = lasersystem.LaserSystem(msg[4])
+        elif (len(msg) == 3):
+            if (0 <= int(msg[2]) <= 14 and not sent):
+                    shoot_angle = laser_array.get_angle(msg[2])
+                    launcher.face_angle(shoot_angle)
                     sent = 1
                     launcher.turretFire()
 

@@ -50,6 +50,7 @@ class launchControl():
       # state:
       self.face_left_fully()
       self._current_facing = 0
+      self._bullets = 4
 
       # determined via experimentation:
       self._rotation_rate = 49.3
@@ -73,6 +74,16 @@ class launchControl():
    def get_firing_time(self):
       return self._firing_time
 
+   def set_facing(self, facing):
+      self._current_facing = facing
+
+   def can_fire(self):
+      return is self._bullets
+
+   def decrement_bullets(self):
+      self._bullets += -1
+
+
    # Commands:
    def turretUp(self):
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x02,0,0,0,0,0,0])
@@ -90,7 +101,9 @@ class launchControl():
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x20,0,0,0,0,0,0])
 
    def turretFire(self):
-      self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
+      if self.can_fire():
+         self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
+         self.decrement_bullets()
 
    def rotate_left_for(self, seconds):
       self.turretLeft()
@@ -119,6 +132,10 @@ class launchControl():
       return (angle - self.get_facing() < 0)
 
    def face_angle(self, angle):
+      """
+      turns the launcher to face the given angle, and updates the stored
+      _current_facing accordingly.
+      """
       facing = self.get_facing()
       rotation_needed = abs(angle - facing)
 
@@ -128,7 +145,8 @@ class launchControl():
          self.rotate_left_for(rotation_time)
       else:
          self.rotate_right_for(rotation_time)
-      
+
+      self.set_facing(angle)
 
 if __name__ == '__main__':
    pass
