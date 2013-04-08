@@ -26,6 +26,7 @@ void setup()
     default_voltages[i] = reading;
 
     if (reading) { // assumes non-occupied pins are grounded
+      Serial.println(reading);
       active_pins++;
     }
   }
@@ -44,7 +45,7 @@ void loop()
     diff = default_voltages[i] - reading;
     //Serial.print(default_voltages[i]); Serial.print(" ");
     // Serial.print(diff); Serial.print(" ");
-    if (diff < 50) {
+    if (diff < -100) {
        Serial.print("Laser Tripped: ");
        Serial.println(i);
        delay(1000);
