@@ -8,7 +8,7 @@ class LaserSystem():
     '''
     def __init__(self, num_lasers):
         self._num_lasers = num_lasers
-        self._spread = (max_rotation / num_lasers - 1)
+        self._spread = (max_rotation / (num_lasers - 1))
         self._facing = 0
 
         self._angles = dict()
@@ -16,7 +16,7 @@ class LaserSystem():
         n = 0
         for i in range(num_lasers):
             self._angles[i] = n
-            n += spread
+            n += self._spread
 
     def get_angle(self, laser):
         '''

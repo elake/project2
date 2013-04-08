@@ -37,6 +37,7 @@ import os
 import sys
 import time
 import usb.core
+import math
 
 class launchControl():
    def __init__(self):
@@ -56,7 +57,9 @@ class launchControl():
       self._rotation_rate = 49.3
       self._pitch_up_rate = 64.748
       self._pitch_down_rate = 59.603
-      self._firing_time = 0
+      
+      self._shot_time = 1.0
+      self._full_firing_time = 3.5
 
    # Accessors:
    def get_facing(self):
@@ -71,14 +74,16 @@ class launchControl():
    def get_pitch_down_rate(self):
       return self._pitch_down_rate
 
-   def get_firing_time(self):
-      return self._firing_time
+   def get_firing_time(self, full = None):
+      if full:
+         return self._full_firing_time
+      return self._shot_time
 
    def set_facing(self, facing):
       self._current_facing = facing
 
    def can_fire(self):
-      return is self._bullets
+      return self._bullets
 
    def decrement_bullets(self):
       self._bullets += -1
@@ -104,6 +109,10 @@ class launchControl():
       if self.can_fire():
          self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
          self.decrement_bullets()
+         # rotation rate is not precise, so we reset every shot so that errors
+         # in approximating rotation rates do not build upon themselves
+         time.sleep(self.get_firing_time(1))
+         self.face_left_fully() 
 
    def rotate_left_for(self, seconds):
       self.turretLeft()
@@ -119,6 +128,7 @@ class launchControl():
       self.turretLeft()
       time.sleep(6.0)
       self.turretStop()
+      self.set_facing(0)
 
    # Other:
    def turn_time(self, angle):
@@ -147,6 +157,45 @@ class launchControl():
          self.rotate_right_for(rotation_time)
 
       self.set_facing(angle)
+      print(self.get_facing())
+
+   def lead_target(self, target_angle, target_velocity):
+      '''
+      turn to and fire at the nearest spot this launcher will be able to hit the
+      target with the given radial velocity, using this launcher's rate of 
+      rotation and firing time.
+      '''
+      rot_rate = self.get_rotation_rate()
+      fire_time = self.get_firing_time()
+
+      time = (target_velocity * fire_time) + target_angle
+      time = time / (rot_rate - target_velocity)
+
+      i = target_velocity / 360
+      clip = i*math.ceil(fire_time / i)
+
+      angle = time * rot_rate
+      self.face_angle(angle % 270)
+      return ((angle / rot_rate) - ((angle % 270) / rot_rate)) % clip
+      
 
 if __name__ == '__main__':
    pass
+   '''
+   turret = launchControl()
+   j = 0
+   while 1:
+      turret.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
+      time.sleep(3.5)
+      
+      j += 0.1
+      turret.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
+      time.sleep(j)
+      turret.turretStop()
+      print(j)
+      time.sleep(3.5)
+   '''
+
+
+   
+

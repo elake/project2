@@ -4,7 +4,7 @@
 */
 #include <Arduino.h>
 
-const uint8_t max_pins = 15;
+const uint8_t max_pins = 10;
 uint16_t default_voltages[max_pins];
 uint8_t active_pins = 0;
 

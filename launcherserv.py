@@ -3,14 +3,13 @@ import serial
 import argparse
 import time
 import stormLauncher
-
+import lasersystem
 global debug
 debug = False
 
 def main():
     args = parse_args()
     launcher = stormLauncher.launchControl()
-    sent = 0
     # Initialize some stuff...
     if args.serialport:
         print("Opening serial port: %s" % args.serialport)
@@ -24,20 +23,41 @@ def main():
     else:
         debug = False
 
-    idx = 0
-    time.sleep(5.0)
+    prev_laser = None
+    prev_time = 0
+
+    time.sleep(1.0)
     while True:
         msg = receive(serial_in) # get the message coming in on the serial port
         print(msg)
         msg = msg.split(" ")
         if len(msg) == 5: # Receiving num_lasers
-            laser_array = lasersystem.LaserSystem(msg[4])
+            try: int(msg[4])
+            except ValueError: continue
+            laser_array = lasersystem.LaserSystem(int(msg[4]))
         elif (len(msg) == 3):
-            if (0 <= int(msg[2]) <= 14 and not sent):
-                    shoot_angle = laser_array.get_angle(msg[2])
-                    launcher.face_angle(shoot_angle)
-                    sent = 1
-                    launcher.turretFire()
+            try: int(msg[2]) 
+            except ValueError: continue
+            cur_laser = int(msg[2])
+            cur_time = time.time()
+            if prev_laser is None:
+                prev_laser = cur_laser
+                prev_time = time.time()
+                continue
+
+            if prev_laser != cur_laser:
+                a1 = laser_array.get_angle(prev_laser)
+                a2 = laser_array.get_angle(cur_laser)
+                velocity = target_velocity(a1, a2, prev_time, cur_time)
+                wait_time = launcher.lead_target(a2, velocity)
+                print(wait_time)
+                time.sleep(wait_time)
+                launcher.turretFire()
+            else:
+                angle = laser_array.get_angle(cur_laser)
+                launcher.face_angle(angle)
+                launcher.turretFire()
+            prev_laser = None
 
 def send(serial_port, message):
     """
@@ -86,6 +106,13 @@ def parse_args():
                         help='verbose',
                         action='store_true')
     return parser.parse_args()
+
+def target_velocity(prev_angle, cur_angle, prev_time, cur_time):
+    '''
+    determine the radial velocity of the target given its current angle relative
+    to its previous angle at the given times
+    '''
+    return (cur_angle - prev_angle) / (cur_time - prev_time)
 
 if __name__ == '__main__':
     main()
