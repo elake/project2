@@ -180,7 +180,12 @@ class launchControl():
       clip = target_rev_time*math.ceil(fire_time / target_rev_time)
 
       angle = time * rot_rate
-      self.face_angle(angle % 270)
+      if 0 < angle < 270:
+         self.face_angle(angle)
+         return 0
+      else:
+         target_facing = math.copysign(target_facing, target_velocity)
+         return (360-target_facing) / abs(target_velocity)
       #print(repr((angle / target_velocity)))
       #print("clip = {}".format(repr(clip)))
       #print("angle = {}".format(angle))
