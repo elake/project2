@@ -39,7 +39,7 @@ import time
 import usb.core
 import math
 
-class launchControl():
+class Turret():
    def __init__(self):
       self.dev = usb.core.find(idVendor=0x2123, idProduct=0x1010)
       if self.dev is None:
@@ -59,7 +59,7 @@ class launchControl():
       self._pitch_down_rate = 59.603
       
       self._shot_time = 1.0
-      self._full_firing_time = 3.5
+      self._full_firing_time = 4.0
 
    # Accessors:
    def get_facing(self):
@@ -90,22 +90,22 @@ class launchControl():
 
 
    # Commands:
-   def turretUp(self):
+   def rotate_up(self):
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x02,0,0,0,0,0,0])
       
-   def turretDown(self):
+   def rotate_down(self):
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x01,0,0,0,0,0,0])
 
-   def turretLeft(self):
+   def rotate_left(self):
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x04,0,0,0,0,0,0])
 
-   def turretRight(self):
+   def rotate_right(self):
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x08,0,0,0,0,0,0])
 
-   def turretStop(self):
+   def stop(self):
       self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x20,0,0,0,0,0,0])
 
-   def turretFire(self):
+   def fire(self):
       if self.can_fire():
          self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
          self.decrement_bullets()
@@ -115,19 +115,19 @@ class launchControl():
          self.face_left_fully() 
 
    def rotate_left_for(self, seconds):
-      self.turretLeft()
+      self.rotate_left()
       time.sleep(float(seconds))
-      self.turretStop()
+      self.stop()
 
    def rotate_right_for(self, seconds):
-      self.turretRight()
+      self.rotate_right()
       time.sleep(float(seconds))
-      self.turretStop()
+      self.stop()
       
    def face_left_fully(self):
-      self.turretLeft()
+      self.rotate_left()
       time.sleep(6.0)
-      self.turretStop()
+      self.stop()
       self.set_facing(0)
 
    # Other:
@@ -174,24 +174,23 @@ class launchControl():
 
       angle = time * rot_rate
       if 0 < angle < 270:
-         #self.face_angle(angle)
+         self.face_angle(angle)
          return 0
       else:
-         target_facing = math.copysign(target_angle, target_velocity)
-         time_until_aligned = (360-target_facing) / abs(target_velocity)
+         relative_target_facing = math.copysign(target_angle, target_velocity)
+         time_until_aligned = (360-relative_target_facing)/abs(target_velocity)
          time_to_shoot = time_until_aligned - fire_time
-         # clip is the time for the smallest number of full revolutions by
-         # the target that's longer than the firing time of the turret.
-         clip = 0
+         
+         extra_revs = 0
          if (fire_time-time_to_shoot) > 0:
-            clip = math.ceil((fire_time-time_to_shoot)/target_rev_time)
-         return time_to_shoot + target_rev_time*clip
+            extra_revs = math.ceil((fire_time-time_to_shoot)/target_rev_time)
+         return time_to_shoot + target_rev_time*extra_revs
 
 
 if __name__ == '__main__':
    pass
-   '''
-   turret = launchControl()
+   
+   turret = Turret()
    j = 0
    while 1:
       turret.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
@@ -200,10 +199,10 @@ if __name__ == '__main__':
       j += 0.1
       turret.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
       time.sleep(j)
-      turret.turretStop()
+      turret.stop()
       print(j)
       time.sleep(3.5)
-   '''
+   
 
 
    

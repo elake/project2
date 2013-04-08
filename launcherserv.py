@@ -2,18 +2,19 @@ import sys
 import serial
 import argparse
 import time
-import stormLauncher
+import launcher
 import lasersystem
 global debug
 debug = False
 
 def main():
     args = parse_args()
-    launcher = stormLauncher.launchControl()
+    turret = launcher.Turret()
     # Initialize some stuff...
     if args.serialport:
         print("Opening serial port: %s" % args.serialport)
-        serial_out = serial_in =  serial.Serial(args.serialport, 9600)
+        serial_out = serial_in = serial.Serial(args.serialport, 9600)
+        serial_in.flushInput()
     else:
         print("No serial port.  Supply one with the -s port option")
         sys.exit()
@@ -45,18 +46,25 @@ def main():
                 prev_time = time.time()
                 continue
 
-            if prev_laser != cur_laser:
-                a1 = laser_array.get_angle(prev_laser)
+            if prev_laser != cur_laser: # then the target is moving
+                a1 = laser_array.get_angle(prev_laser) # get angles of lasers
                 a2 = laser_array.get_angle(cur_laser)
+                # determine velocity mathematically
                 velocity = target_velocity(a1, a2, prev_time, cur_time)
-                wait_time = launcher.lead_target(a2, velocity)
+                # ask the turret to turn to catch up to the target and return
+                # the amount of time it needs to wait for the target to come
+                # back around
+                wait_time = turret.lead_target(a2, velocity)
                 print(wait_time)
+                # wait the indicated amount of time, then fire on the target
                 time.sleep(wait_time)
-                launcher.turretFire()
-            else:
-                angle = laser_array.get_angle(cur_laser)
-                launcher.face_angle(angle)
-                launcher.turretFire()
+                turret.fire()
+            else: # the target is stationary
+                angle = laser_array.get_angle(cur_laser) # get angle of laser
+                # ask the turret: turn to face the angle and fire on the target
+                turret.face_angle(angle)
+                turret.fire()
+            serial_in.flushInput()
             prev_laser = None
 
 def send(serial_port, message):
@@ -116,3 +124,4 @@ def target_velocity(prev_angle, cur_angle, prev_time, cur_time):
 
 if __name__ == '__main__':
     main()
+

@@ -44,7 +44,7 @@ void loop()
     diff = default_voltages[i] - reading;
     //Serial.print(default_voltages[i]); Serial.print(" ");
     // Serial.print(diff); Serial.print(" ");
-    if (diff > 50) {
+    if (diff < 50) {
        Serial.print("Laser Tripped: ");
        Serial.println(i);
        delay(1000);
