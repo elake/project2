@@ -10,6 +10,8 @@ debug = False
 def main():
     args = parse_args()
     turret = launcher.Turret()
+    laser_array = None
+
     # Initialize some stuff...
     if args.serialport:
         print("Opening serial port: %s" % args.serialport)
@@ -36,8 +38,8 @@ def main():
             try: int(msg[4]) 
             except ValueError: continue
             laser_array = lasersystem.LaserSystem(int(msg[4]))
-        elif (len(msg) == 3 and msg[0] == "Laser"):
-            try: int(msg[2]) 
+        elif (len(msg) == 3 and msg[0] == "Laser" and laser_array):
+            try: int(msg[2])
             except ValueError: continue
             cur_laser = int(msg[2])
             cur_time = time.time()
@@ -49,7 +51,7 @@ def main():
             if prev_laser != cur_laser: # then the target is moving
                 a1 = laser_array.get_angle(prev_laser) # get angles of lasers
                 a2 = laser_array.get_angle(cur_laser)
-                # determine velocity mathematically
+                # determine velocity of the target
                 velocity = target_velocity(a1, a2, prev_time, cur_time)
                 # ask the turret to turn to catch up to the target and return
                 # the amount of time it needs to wait for the target to come

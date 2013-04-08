@@ -21,17 +21,9 @@
 # Missile Launchers.  There are a few projects for using older launchers
 # in Linux, but I couldn't find any for this launcher, so... enjoy.
 
-# Thunder: http://www.dreamcheeky.com/thunder-missile-launcher
-# O.I.C Storm: http://www.dreamcheeky.com/storm-oic-missile-launcher
-
 # This script requires:
 # * PyUSB 1.0+, apt in Debian/Ubuntu installs 0.4.
-# * The ImageTk library. On Debian/Ubuntu 'sudo apt-get install python-imaging-tk'
 # Also, unless you want to toggle with udev rules, it needs to be run as root
-
-# Use arrows to aim.  Sse the left enter to fire.
-
-# BTW, Leeroy Jenkins Mode .wav is from: http://www.leeroyjenkins.net/soundbites/warcry.wav
 
 import os
 import sys
@@ -108,12 +100,12 @@ class Turret():
    def fire(self):
       if self.can_fire():
          self.dev.ctrl_transfer(0x21,0x09,0,0,[0x02,0x10,0,0,0,0,0,0])
-         self.decrement_bullets()
          # rotation rate is not precise, so we reset every shot so that errors
          # in approximating rotation rates do not build upon themselves
          time.sleep(self.get_firing_time(1))
          self.face_left_fully() 
 
+   # Complex Commands
    def rotate_left_for(self, seconds):
       self.rotate_left()
       time.sleep(float(seconds))

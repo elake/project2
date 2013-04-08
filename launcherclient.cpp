@@ -24,7 +24,6 @@ void setup()
   for (uint8_t i = 0; i < max_pins; i++) {
     reading = analogRead(i);
     default_voltages[i] = reading;
-
     if (reading) { // assumes non-occupied pins are grounded
       Serial.println(reading);
       active_pins++;
@@ -48,7 +47,7 @@ void loop()
     if (diff < -100) {
        Serial.print("Laser Tripped: ");
        Serial.println(i);
-       delay(1000);
+       delay(1500);
     }
   }
 }
