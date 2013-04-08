@@ -47,7 +47,7 @@ void loop()
     if (diff > 50) {
        Serial.print("Laser Tripped: ");
        Serial.println(i);
-       delay(400);
+       delay(1000);
     }
   }
 }

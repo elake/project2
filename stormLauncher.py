@@ -147,11 +147,11 @@ class launchControl():
       _current_facing accordingly.
       """
       facing = self.get_facing()
-      rotation_needed = abs(angle - facing)
+      rotation_needed = abs(angle - facing) # the amount I need to rotate
 
-      rotation_time = self.turn_time(rotation_needed)
+      rotation_time = self.turn_time(rotation_needed) 
       
-      if (self.angle_to_left(angle)):
+      if (self.angle_to_left(angle)): # rotate for determined time to face angle
          self.rotate_left_for(rotation_time)
       else:
          self.rotate_right_for(rotation_time)
@@ -171,13 +171,21 @@ class launchControl():
       time = (target_velocity * fire_time) + target_angle
       time = time / (rot_rate - target_velocity)
 
-      i = target_velocity / 360
-      clip = i*math.ceil(fire_time / i)
+      target_velocity = abs(target_velocity)
+
+      target_rev_time = 360 / target_velocity # target's revolution time
+      clip = target_rev_time*math.ceil(fire_time / target_rev_time)
 
       angle = time * rot_rate
       self.face_angle(angle % 270)
-      return ((angle / rot_rate) - ((angle % 270) / rot_rate)) % clip
-      
+      #print(repr((angle / target_velocity)))
+      print("clip = {}".format(repr(clip)))
+      print("angle = {}".format(angle))
+      print("target_velocity = {}".format(target_velocity))
+      retval = (angle / target_velocity) % clip - ((angle % 270) / rot_rate)
+      print("retval = {}".format(retval))
+      return retval
+
 
 if __name__ == '__main__':
    pass
