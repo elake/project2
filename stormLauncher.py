@@ -174,17 +174,30 @@ class launchControl():
       target_velocity = abs(target_velocity)
 
       target_rev_time = 360 / target_velocity # target's revolution time
+
+      # clip is the time for the smallest number of full revolutions by
+      # the target that's longer than the firing time of the turret.
       clip = target_rev_time*math.ceil(fire_time / target_rev_time)
 
       angle = time * rot_rate
       self.face_angle(angle % 270)
       #print(repr((angle / target_velocity)))
-      print("clip = {}".format(repr(clip)))
-      print("angle = {}".format(angle))
-      print("target_velocity = {}".format(target_velocity))
-      retval = (angle / target_velocity) % clip - ((angle % 270) / rot_rate)
-      print("retval = {}".format(retval))
-      return retval
+      #print("clip = {}".format(repr(clip)))
+      #print("angle = {}".format(angle))
+      #print("target_velocity = {}".format(target_velocity))
+
+      # time_until_aligned takes the amount of time until the target will
+      # be at the destination angle (which can be after many revolutions)
+      # and mods it by clip, producing the shortest time that will result
+      # in the target being in the same position, while still giving the
+      # turret enough time to hit it. We then subtract the time it took
+      # the turret to get in position.
+      # time_until_aligned = (angle / target_velocity) % clip
+      time_until_aligned = time % clip
+      time_spent_moving = ((angle % 270) / rot_rate)
+      time_to_wait = time_until_aligned - time_spent_moving
+      #print("retval = {}".format(retval))
+      return time_to_wait
 
 
 if __name__ == '__main__':
