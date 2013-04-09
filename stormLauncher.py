@@ -167,42 +167,25 @@ class launchControl():
       '''
       rot_rate = self.get_rotation_rate()
       fire_time = self.get_firing_time()
-
       time = (target_velocity * fire_time) + target_angle
       time = time / (rot_rate - target_velocity)
 
-      target_velocity = abs(target_velocity)
-
-      target_rev_time = 360 / target_velocity # target's revolution time
-
-      # clip is the time for the smallest number of full revolutions by
-      # the target that's longer than the firing time of the turret.
-      clip = target_rev_time*math.ceil(fire_time / target_rev_time)
+      target_rev_time = abs(360.0 / target_velocity) # target's revolution time
 
       angle = time * rot_rate
       if 0 < angle < 270:
-         self.face_angle(angle)
+         #self.face_angle(angle)
          return 0
       else:
-         target_facing = math.copysign(target_facing, target_velocity)
-         return (360-target_facing) / abs(target_velocity)
-      #print(repr((angle / target_velocity)))
-      #print("clip = {}".format(repr(clip)))
-      #print("angle = {}".format(angle))
-      #print("target_velocity = {}".format(target_velocity))
-
-      # time_until_aligned takes the amount of time until the target will
-      # be at the destination angle (which can be after many revolutions)
-      # and mods it by clip, producing the shortest time that will result
-      # in the target being in the same position, while still giving the
-      # turret enough time to hit it. We then subtract the time it took
-      # the turret to get in position.
-      # time_until_aligned = (angle / target_velocity) % clip
-      time_until_aligned = time % clip
-      time_spent_moving = ((angle % 270) / rot_rate)
-      time_to_wait = time_until_aligned - time_spent_moving
-      #print("retval = {}".format(retval))
-      return time_to_wait
+         target_facing = math.copysign(target_angle, target_velocity)
+         time_until_aligned = (360-target_facing) / abs(target_velocity)
+         time_to_shoot = time_until_aligned - fire_time
+         # clip is the time for the smallest number of full revolutions by
+         # the target that's longer than the firing time of the turret.
+         clip = 0
+         if (fire_time-time_to_shoot) > 0:
+            clip = math.ceil((fire_time-time_to_shoot)/target_rev_time)
+         return time_to_shoot + target_rev_time*clip
 
 
 if __name__ == '__main__':
