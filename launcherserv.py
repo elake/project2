@@ -32,11 +32,11 @@ def main():
         msg = receive(serial_in) # get the message coming in on the serial port
         print(msg)
         msg = msg.split(" ")
-        if len(msg) == 5: # Receiving num_lasers
-            try: int(msg[4])
+        if len(msg) == 5 and msg[0] == "Number": # Receiving num_lasers
+            try: int(msg[4]) 
             except ValueError: continue
             laser_array = lasersystem.LaserSystem(int(msg[4]))
-        elif (len(msg) == 3):
+        elif (len(msg) == 3 and msg[0] == "Laser"):
             try: int(msg[2]) 
             except ValueError: continue
             cur_laser = int(msg[2])
