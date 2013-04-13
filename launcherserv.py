@@ -12,7 +12,7 @@ def main():
     turret = launcher.Turret()
     laser_array = None
 
-    # Initialize some stuff...
+    # Initialize the serial port
     if args.serialport:
         print("Opening serial port: %s" % args.serialport)
         serial_out = serial_in = serial.Serial(args.serialport, 9600)
@@ -39,11 +39,13 @@ def main():
             except ValueError: continue
             laser_array = lasersystem.LaserSystem(int(msg[4]))
         elif (len(msg) == 3 and msg[0] == "Laser" and laser_array):
+            # receiving laser interrupt; double check that this is not a faulty
+            # serial port message:
             try: int(msg[2])
             except ValueError: continue
             cur_laser = int(msg[2])
             cur_time = time.time()
-            if prev_laser is None:
+            if prev_laser is None: # two lasers have been interrupted
                 prev_laser = cur_laser
                 prev_time = time.time()
                 continue

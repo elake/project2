@@ -4,7 +4,11 @@
 */
 #include <Arduino.h>
 
-const uint8_t max_pins = 10;
+// we set this to 10 because grounding so many pins consumes a lot of space on the
+// breadboard, but theoretically you could have as many sensors as you want in your
+// array
+const uint8_t max_pins = 10; 
+
 uint16_t default_voltages[max_pins];
 uint8_t active_pins = 0;
 
@@ -17,11 +21,11 @@ void setup()
   */
   Serial.begin(9600);
   Serial.flush();
-  delay(5000);
+  delay(5000); // double flush the serial monitor
   Serial.flush();
 
-  uint16_t reading;
-  for (uint8_t i = 0; i < max_pins; i++) {
+  uint16_t reading; // mark which pins are currently active on the board
+  for (uint8_t i = 0; i < max_pins; i++) { 
     reading = analogRead(i);
     default_voltages[i] = reading;
     if (reading) { // assumes non-occupied pins are grounded
@@ -29,8 +33,9 @@ void setup()
       active_pins++;
     }
   }
+  // send this information to the serial port, where the server is waiting for it
   Serial.print("Number of pins active: ");
-  Serial.println(active_pins);
+  Serial.println(active_pins); 
 }
 
 void loop()
@@ -42,12 +47,12 @@ void loop()
     reading = analogRead(i);
     // Serial.print(reading); Serial.print(" ");
     diff = default_voltages[i] - reading;
-    //Serial.print(default_voltages[i]); Serial.print(" ");
-    // Serial.print(diff); Serial.print(" ");
-    if (diff < -100) {
-       Serial.print("Laser Tripped: ");
-       Serial.println(i);
-       delay(1500);
+    if (diff < -100) { 
+      // detect voltage drops increases; this reduces misfires attributable to
+      // ambient lighting changes
+      Serial.print("Laser Tripped: "); // send the interrupted sensor to the server
+      Serial.println(i);
+      delay(1500); // delaying client side is the simplest solution
     }
   }
 }
